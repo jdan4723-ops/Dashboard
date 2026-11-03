@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>ระบบติดตามตัวชี้วัดประจำปีงบประมาณ</title>
+
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600&family=Sarabun:wght@400;500;600&display=swap"
+    />
+
+    <style>
+      :root {
+        --bg: #f4f8f5;
+        --card: #fff;
+        --ink: #10241a;
+        --mute: #637468;
+        --line: #e2ebe5;
+        --pri: #005411;
+        --pri2: #2bb15c;
+        --onpri: #fff;
+        --acc: #3b82f6;
+        --ok: #10b981;
+        --bad: #ef4444;
+        --wait: #9ca3af;
+        --soft: #e9f7ee;
+        --ro: #f0f5f2;
+        --shadow: 0 1px 2px rgba(16, 36, 26, 0.05), 0 8px 24px rgba(16, 36, 26, 0.06);
+        --shadow-h: 0 4px 10px rgba(16, 36, 26, 0.08), 0 16px 36px rgba(0, 84, 17, 0.14);
+        --glow1: rgba(22, 163, 74, 0.14);
+        --glow2: rgba(59, 130, 246, 0.1);
+
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #08130d;
+          --card: #0f1f16;
+          --ink: #e6f2ea;
+          --mute: #92a89a;
+          --line: #1e3427;
+          --pri: #4ade80;
+          --pri2: #22ee30;
+          --onpri: #06210f;
+          --soft: #143023;
+          --ro: #15281d;
+          --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.3);
+          --shadow-h: 0 4px 10px rgba(0, 0, 0, 0.4), 0 16px 36px rgba(74, 222, 128, 0.12);
+          --glow1: rgba(74, 222, 128, 0.1);
+          --glow2: rgba(34, 211, 238, 0.08);
+        }
+      }
+
+      :root[data-theme="dark"] {
+        --bg: #0f0f0f;
+        --card: #202120;
+        --ink: #fafbfb;
+        --mute: #f7f7f7;
+        --line: #1e3427;
+        --pri: #19b753;
+        --pri2: #03500c;
+        --onpri: #eef7f1;
+        --soft: #0e4e00;
+        --ro: #15281d;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.3);
+        --shadow-h: 0 4px 10px rgba(0, 0, 0, 0.4), 0 16px 36px rgba(74, 222, 128, 0.12);
+        --glow1: rgba(74, 222, 128, 0.1);
+        --glow2: rgba(34, 211, 238, 0.08);
+      }
+
+      html {
+        scroll-padding-top: env(safe-area-inset-top, 0px);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        background-image: radial-gradient(900px 500px at 100% -10%, var(--glow1), transparent 60%),
+          radial-gradient(700px 400px at 0% 110%, var(--glow2), transparent 60%);
+        background-attachment: fixed;
+        color: var(--ink);
+        font-family: Sarabun, Kanit, sans-serif;
+        font-size: 15px;
+        transition: background-color 0.4s, color 0.4s;
+      }
+
+      h1,
+      h2,
+      h3,
+
+      .big {
+        font-family: Kanit, Sarabun, sans-serif;
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      @keyframes fade {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes pop {
+        from {
+          opacity: 0;
+          transform: translateY(18px) scale(0.96);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      @keyframes grow {
+        from {
+          transform: scaleY(0);
+        }
+        to {
+          transform: scaleY(1);
+        }
+      }
+
+      @keyframes fill {
+        from {
+          transform: scaleX(0);
+        }
+        to {
+          transform: scaleX(1);
+        }
+      }
+
+      @keyframes glow {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+        }
+      }
+
+      @keyframes shine {
+        to {
+          background-position: 200% center;
+        }
+      }
+
+      .app {
+        display: flex;
+        min-height: 100vh;
+      }
+
+      aside {
+        width: 232px;
+        background: var(--card);
+        border-right: 1px solid var(--line);
+        padding: 22px 14px;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        flex-shrink: 0;
+        box-shadow: 4px 0 24px rgba(16, 36, 26, 0.04);
+      }
+
+      .logo {
+        font-family: Kanit;
+        font-weight: 600;
+        font-size: 18px;
+        margin: 0 8px 22px;
+        background: linear-gradient(90deg, var(--pri), var(--pri2), var(--pri));
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: shine 5s linear infinite;
+      }
+
+      aside button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        border: 0;
+        background: none;
+        color: var(--mute);
+        padding: 11px 14px;
+        border-radius: 10px;
+        font: inherit;
+        cursor: pointer;
+        margin-bottom: 6px;
+        transition: transform 0.2s, background 0.2s, color 0.2s, box-shadow 0.2s;
+      }
+
+      aside button:hover {
+        background: var(--soft);
+        color: var(--pri);
+        transform: translateX(4px);
+      }
+
+      aside button.on {
+        background: linear-gradient(135deg, var(--pri), var(--pri2));
+        color: var(--onpri);
+        font-weight: 600;
+        box-shadow: 0 6px 16px rgba(0, 84, 17, 0.28);
+      }
+
+      #sv-st {
+        font-size: 12px;
+        color: var(--mute);
+        margin: 14px 8px 0;
+      }
+
+      main {
+        flex: 1;
+        min-width: 0;
+        padding: 24px 28px;
+      }
+
+      .top {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 22px;
+        animation: fadeUp 0.5s both;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin: 0;
+        font-weight: 600;
+        background: linear-gradient(90deg, var(--ink), var(--pri));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .filters {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      select,
+      input {
+        font: inherit;
+        color: var(--ink);
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 8px 10px;
+        min-width: 0;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+
+      select:hover,
+      input:hover {
+        border-color: var(--pri2);
+      }
+
+      select:focus,
+      input:focus,
+      button:focus-visible {
+        outline: 2px solid var(--pri2);
+        outline-offset: 1px;
+      }
+
+      .btn {
+        border: 0;
+        border-radius: 10px;
+        padding: 9px 16px;
+        font: inherit;
+        font-weight: 500;
+        cursor: pointer;
+        background: linear-gradient(135deg, var(--pri), var(--pri2));
+        color: var(--onpri);
+        box-shadow: 0 4px 12px rgba(0, 84, 17, 0.22);
+        transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 84, 17, 0.3);
+        filter: brightness(1.08);
+      }
+
+      .btn:active {
+        transform: translateY(0) scale(0.97);
+      }
+
+      .btn.g {
+        background: transparent;
+        color: var(--mute);
+        border: 1px solid var(--line);
+        box-shadow: none;
+      }
+
+      .btn.g:hover {
+        color: var(--pri);
+        border-color: var(--pri2);
+        background: var(--soft);
+        box-shadow: none;
+      }
+
+      .btn.d {
+        background: var(--bad);
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      }
+
+      .btn.s {
+        padding: 6px 12px;
+        font-size: 13px;
+      }
+
+      .ic {
+        border: 0;
+        background: none;
+        cursor: pointer;
+        color: var(--mute);
+        font-size: 15px;
+        padding: 4px 6px;
+        border-radius: 8px;
+        transition: transform 0.2s, background 0.2s;
+      }
+
+      .ic:hover {
+        background: var(--line);
+        transform: scale(1.18) rotate(-6deg);
+      }
+
+      .grid {
+        display: grid;
+        gap: 16px;
+      }
+
+      .c4 {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      .c2 {
+        grid-template-columns: 5fr 2fr;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 18px;
+        min-width: 0;
+        box-shadow: var(--shadow);
+        transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+        animation: fadeUp 0.5s both;
+      }
+
+      .card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-h);
+        border-color: var(--pri2);
+      }
+
+      .c4 .card:nth-child(2) {
+        animation-delay: 0.07s;
+      }
+
+      .c4 .card:nth-child(3) {
+        animation-delay: 0.14s;
+      }
+
+      .c4 .card:nth-child(4) {
+        animation-delay: 0.21s;
+      }
+
+      .c4 .card {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .c4 .card::after {
+        content: "";
+        position: absolute;
+        right: -24px;
+        top: -24px;
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--pri2), transparent 70%);
+        opacity: 0.16;
+        transition: transform 0.4s;
+      }
+
+      .c4 .card:hover::after {
+        transform: scale(1.5);
+      }
+
+      .card h3 {
+        margin: 0 0 12px;
+        font-size: 15px;
+        font-weight: 500;
+      }
+
+      .hd {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+
+      .hd h3 {
+        margin: 0;
+      }
+
+      .k {
+        color: var(--mute);
+        font-size: 13px;
+      }
+
+      .big {
+        font-size: 32px;
+        font-weight: 600;
+        margin-top: 4px;
+        background: linear-gradient(90deg, var(--ink), var(--pri));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+
+      .seg {
+        display: inline-flex;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .seg button {
+        border: 0;
+        background: none;
+        color: var(--mute);
+        padding: 4px 12px;
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+        transition: background 0.2s, color 0.2s;
+      }
+
+      .seg .on {
+        background: var(--soft);
+        color: var(--pri);
+        font-weight: 600;
+      }
+
+      .wrap {
+        overflow-x: auto;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+
+      th {
+        color: var(--mute);
+        font-weight: 500;
+        text-align: left;
+        padding: 10px 8px;
+        border-bottom: 1px solid var(--line);
+        white-space: nowrap;
+      }
+
+      td {
+        padding: 8px;
+        border-bottom: 1px solid var(--line);
+        transition: background 0.2s;
+      }
+
+      #tb tr:hover td,
+      #mt tr:hover td {
+        background: var(--soft);
+      }
+
+      th.r,
+      td.r {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .badge {
+        padding: 3px 11px;
+        border-radius: 99px;
+        font-size: 12px;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      .b-ok {
+        background: #d1fae5;
+        color: #065f46;
+        animation: glow 2.4s infinite;
+      }
+
+      .b-mid {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .b-bad {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+
+      .b-wait {
+        background: #e5e7eb;
+        color: #374151;
+      }
+
+      .bar {
+        height: 8px;
+        background: var(--line);
+        border-radius: 9px;
+        min-width: 70px;
+        overflow: hidden;
+      }
+
+      .bar i {
+        display: block;
+        height: 100%;
+        border-radius: 9px;
+        transform-origin: left;
+        animation: fill 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+      }
+
+      .mt input {
+        width: 66px;
+        text-align: right;
+        padding: 5px 6px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .mt input:focus {
+        box-shadow: 0 0 0 3px var(--soft);
+      }
+
+      .mt tr.tg input {
+        background: var(--ro);
+      }
+
+      .mt td:first-child,
+      .mt th:first-child {
+        position: sticky;
+        left: 0;
+        background: var(--card);
+        min-width: 170px;
+        z-index: 1;
+      }
+
+      .mi {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 8px;
+        border-bottom: 1px solid var(--line);
+        flex-wrap: wrap;
+        border-radius: 12px;
+        transition: background 0.2s, transform 0.2s;
+        animation: fadeUp 0.45s both;
+      }
+
+      .mi:hover {
+        background: var(--soft);
+        transform: translateX(4px);
+      }
+
+      .date {
+        background: linear-gradient(135deg, var(--pri), var(--pri2));
+        color: var(--onpri);
+        border-radius: 12px;
+        padding: 8px 12px;
+        text-align: center;
+        min-width: 86px;
+        font-family: Kanit;
+        font-size: 13px;
+        line-height: 1.3;
+        box-shadow: 0 6px 14px rgba(0, 84, 17, 0.25);
+      }
+
+      .mi .t {
+        flex: 1;
+        font-weight: 500;
+        min-width: 160px;
+      }
+
+      .ov {
+        position: fixed;
+        inset: 0;
+        background: rgba(5, 20, 12, 0.45);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        z-index: 20;
+      }
+
+      .ov.show {
+        display: flex;
+        animation: fade 0.25s both;
+      }
+
+      .modal {
+        background: var(--card);
+        border-radius: 18px;
+        width: min(900px, 100%);
+        max-height: 90vh;
+        overflow: auto;
+        padding: 22px;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--line);
+      }
+
+      .ov.show .modal {
+        animation: pop 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+      }
+
+      .modal.sm {
+        width: min(460px, 100%);
+      }
+
+      .modal h2 {
+        margin: 0 0 14px;
+        font-size: 20px;
+      }
+
+      .two {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+      }
+
+      .ro {
+        background: var(--ro);
+        border-radius: 12px;
+        padding: 8px 12px;
+        max-height: 340px;
+        overflow: auto;
+      }
+
+      .ro > div {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px dashed var(--line);
+        font-size: 14px;
+      }
+
+      label {
+        display: block;
+        font-size: 13px;
+        color: var(--mute);
+        margin: 10px 0 4px;
+      }
+
+      .modal select,
+      .modal input {
+        width: 100%;
+      }
+
+      .act {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 18px;
+      }
+
+      details {
+        margin-top: 16px;
+        border-top: 1px solid var(--line);
+        padding-top: 10px;
+      }
+
+      summary {
+        cursor: pointer;
+        color: var(--pri);
+        font-weight: 500;
+      }
+
+      .row {
+        display: flex;
+        gap: 6px;
+        margin: 6px 0;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        background: var(--ro);
+        border-radius: 99px;
+        padding: 2px 4px 2px 12px;
+        margin: 3px;
+      }
+
+      .lg {
+        border: 1px solid var(--line);
+        background: none;
+        color: var(--ink);
+        border-radius: 99px;
+        padding: 3px 10px;
+        font: inherit;
+        font-size: 13px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        transition: transform 0.2s, background 0.2s;
+      }
+
+      .lg:hover {
+        background: var(--soft);
+        transform: translateY(-2px);
+      }
+
+      .lg.off {
+        opacity: 0.45;
+        text-decoration: line-through;
+      }
+
+      .legend {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap;
+        font-size: 13px;
+        color: var(--mute);
+        margin-top: 8px;
+      }
+
+      .legend i {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        margin-right: 5px;
+      }
+
+      svg rect {
+        transform-box: fill-box;
+        transform-origin: 50% 100%;
+        animation: grow 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+        transition: filter 0.2s;
+      }
+
+      svg rect:hover {
+        filter: brightness(1.15);
+      }
+
+      svg circle,
+      svg polyline {
+        animation: fade 0.8s both;
+      }
+
+      .empty {
+        text-align: center;
+        padding: 30px 10px;
+        color: var(--mute);
+      }
+
+      .empty .btn {
+        margin: 6px;
+      }
+
+      .tab {
+        display: none;
+      }
+
+      .tab.on {
+        display: block;
+        animation: fadeUp 0.45s both;
+      }
+
+      #toast {
+        position: fixed;
+        left: 50%;
+        bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+        transform: translate(-50%, 20px);
+        background: linear-gradient(135deg, var(--pri), var(--pri2));
+        color: var(--onpri);
+        padding: 10px 20px;
+        border-radius: 99px;
+        font-size: 14px;
+        box-shadow: 0 10px 28px rgba(0, 84, 17, 0.35);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s, transform 0.25s;
+        z-index: 50;
+        max-width: 90vw;
+      }
+
+      #toast.on {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+
+      @media (max-width: 860px) {
+        .app {
+          display: block;
+        }
+
+        aside {
+          position: static;
+          width: auto;
+          height: auto;
+          display: flex;
+          gap: 6px;
+          overflow-x: auto;
+          padding: 10px;
+          align-items: center;
+        }
+
+        aside button {
+          white-space: nowrap;
+          width: auto;
+          margin-bottom: 0;
+        }
+
+        .logo,
+        #sv-st {
+          display: none;
+        }
+
+        main {
+          padding: 16px;
+        }
+
+        .c4 {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .c2,
+        .two {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+      
+    </style>
+  </head>
+
+  <body>
+    <div class="app">
+      <aside>
+        <div class="logo">Dashboard ประจำปี</div>
+        <button class="on" data-t="dash">ภาพรวม Dashboard</button>
+        <button data-t="month">ข้อมูลตัวชี้วัดรายเดือน</button>
+        <button data-t="meet">สรุปการประชุม</button>
+        <div id="sv-st"></div>
+      </aside>
+
+      <main>
+        <div class="top">
+          <h1>ตัวชี้วัดประจำปีงบประมาณ</h1>
+          <div class="filters">
+            <select id="fc" aria-label="คณะกรรมการ"></select>
+            <select id="fy" aria-label="ปีงบประมาณ"></select>
+            <button class="btn g" id="th" title="สลับธีมสว่าง/มืด" aria-label="สลับธีม">🌓</button>
+            <button class="btn" id="open">⚙ ตั้งค่าตัวชี้วัด</button>
+          </div>
+        </div>
+
+        <section class="tab on" id="dash">
+          <div class="grid c4" id="sum"></div>
+
+          <div class="grid c2" style="margin-top: 16px">
+            <div class="card">
+              <div class="hd">
+                <h3 id="cht">ผลงานรายเดือน</h3>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                  <select id="ks" aria-label="เลือกตัวชี้วัดในกราฟ" style="max-width: 220px"></select>
+                  <div class="seg" id="seg">
+                    <button class="on" data-c="bar">กราฟแท่ง</button>
+                    <button data-c="line">กราฟเส้น</button>
+                  </div>
+                </div>
+              </div>
+              <div id="ch"></div>
+            </div>
+
+            <div class="card">
+              <h3>สัดส่วนสถานะตัวชี้วัด</h3>
+              <div id="dn"></div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-top: 16px">
+            <div class="hd">
+              <h3>ตารางตัวชี้วัด</h3>
+              <button class="btn s" id="add1">+ เพิ่มตัวชี้วัด</button>
+            </div>
+            <div class="wrap">
+              <table id="tb"></table>
+            </div>
+            <div id="emp"></div>
+          </div>
+        </section>
+
+        <section class="tab" id="month">
+          <div class="card">
+            <div class="hd">
+              <h3>
+
+                ข้อมูลรายเดือน (ตัวเลขเท่านั้น ม.ค. – ธ.ค.)
+
+                <!-- <span class="k">แก้ไขเป้าหมายและผลงานในช่องได้เลย</span> -->
+
+              </h3>
+              <button class="btn g s" id="csv">⬇ ส่งออก CSV</button>
+            </div>
+            <div class="wrap">
+              <table class="mt" id="mt"></table>
+            </div>
+          </div>
+        </section>
+
+        <section class="tab" id="meet">
+          <div class="card">
+            <div class="hd">
+              <h3>เอกสารสรุปการประชุม</h3>
+              <button class="btn s" id="addm">+ เพิ่มการประชุม</button>
+            </div>
+            <div id="ml"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="ov" id="ovS">
+      <div class="modal" role="dialog" aria-modal="true" aria-label="ตั้งค่าตัวชี้วัด">
+        <h2>ตั้งค่าตัวชี้วัดประจำปี</h2>
+
+        <div class="two">
+          <div>
+
+            <!-- <div class="k" style="margin-bottom: 6px">
+              ค่าที่ตั้งไว้แล้ว (กดเพื่อแก้ไข)
+            </div> -->
+
+            <div class="ro" id="cur"></div>
+            <button class="btn g s" id="cp" style="margin-top: 10px"></button>
+          </div>
+
+          <div>
+            <div class="k" id="fh">เพิ่มตัวชี้วัดใหม่</div>
+
+            <label for="fn">ชื่อตัวชี้วัด</label>
+            <input id="fn" placeholder="เช่น ความพึงพอใจผู้รับบริการ" />
+
+            <div class="two" style="gap: 10px">
+              <div>
+                <label for="fu">หน่วย</label>
+                <input id="fu" placeholder="เช่น ร้อยละ" />
+              </div>
+              <div>
+                <label for="ft">เป้าหมายรายเดือน</label>
+                <input id="ft" type="number" min="0" step="any" />
+              </div>
+            </div>
+
+            <label for="fd">ทิศทาง</label>
+            <select id="fd">
+              <option value="up">ยิ่งสูงยิ่งดี</option>
+              <option value="down">ยิ่งต่ำยิ่งดี</option>
+            </select>
+
+            <div class="two" style="gap: 10px">
+              <div>
+                <label for="fcm">คณะกรรมการ</label>
+                <select id="fcm"></select>
+              </div>
+              <div>
+                <label for="fyr">ปีงบประมาณ</label>
+                <select id="fyr"></select>
+              </div>
+            </div>
+
+            <details>
+              <summary>ตั้งค่าอื่นๆ</summary>
+
+              <label>คณะกรรมการ (แก้ชื่อในช่องได้เลย)</label>
+              <div id="cl"></div>
+              <div class="row">
+                <input id="nc" placeholder="ชื่อคณะกรรมการใหม่" />
+                <button class="btn s" id="anc">เพิ่ม</button>
+              </div>
+
+              <label>ปีงบประมาณ</label>
+              <div id="yl"></div>
+              <div class="row">
+                <input id="ny" type="number" placeholder="เช่น 2571" />
+                <button class="btn s" id="any">เพิ่มปี</button>
+              </div>
+            </details>
+          </div>
+        </div>
+
+        <div class="act">
+          <button class="btn g" id="cx">ปิด</button>
+          <button class="btn" id="sv">บันทึก</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ov" id="ovM">
+      <div class="modal sm" role="dialog" aria-modal="true" aria-label="การประชุม">
+        <h2 id="mh">เพิ่มการประชุม</h2>
+
+        <label for="md">วันที่ประชุม</label>
+        <input id="md" type="date" />
+
+        <label for="mt2">หัวข้อสำคัญ</label>
+        <input id="mt2" placeholder="เช่น สรุปการลงทุน" />
+
+        <label for="mu">ลิงก์เอกสารสรุป</label>
+        <input id="mu" placeholder="https://..." />
+
+        <div class="two" style="gap: 10px">
+          <div>
+            <label for="mc">คณะกรรมการ</label>
+            <select id="mc"></select>
+          </div>
+          <div>
+            <label for="my">ปีงบประมาณ</label>
+            <select id="my"></select>
+          </div>
+        </div>
+
+        <div class="act">
+          <button class="btn g" id="mx">ยกเลิก</button>
+          <button class="btn" id="ms">บันทึก</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ov" id="ovC">
+      <div class="modal sm">
+        <h2>ยืนยัน</h2>
+        <p id="cm"></p>
+        <div class="act">
+          <button class="btn g" id="cn">ยกเลิก</button>
+          <button class="btn d" id="cy">ลบ</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" role="status"></div>
+
+    <script>
+
+        const MN=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+        const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+        const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        const clone=o=>JSON.parse(JSON.stringify(o));
+        const fmt=v=>v==null?'–':Number(v).toLocaleString('th-TH',{maximumFractionDigits:2});
+        const def=()=>({committees:[{id:'c1',n:'คณะกรรมการบริหาร'},{id:'c2',n:'คณะกรรมการไอที'}],years:[2569,2570],kpis:[],meetings:[],nid:1});
+          let S=def(),st={c:'c1',y:2570,ch:'bar'},ref=null,editId=null,editM=null,saveT,tt;
+            try{const l=localStorage.getItem('kpi-app');if(l)S=JSON.parse(l)}catch(e){}
+            try{const th=localStorage.getItem('kpi-theme');if(th)document.documentElement.dataset.theme=th}catch(e){}
+        
+        const uid=()=>'i'+(S.nid++);
+        const cur=()=>S.kpis.filter(k=>k.c===st.c&&k.y===st.y);
+        const avgT=k=>+(k.t.reduce((a,b)=>a+(b||0),0)/12).toFixed(2);
+        const cname=id=>(S.committees.find(c=>c.id===id)||{n:''}).n;
+
+        function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),2600)}
+        function setStat(t,bad){const e=$('#sv-st');e.textContent=t;e.style.color=bad?'var(--bad)':'var(--mute)'}
+        function save(){setStat('กำลังบันทึก…');clearTimeout(saveT);saveT=setTimeout(async()=>{try{localStorage.setItem('kpi-app',JSON.stringify(S))}catch(e){}
+            if(!ref){setStat('บันทึกข้อมูลเรียบร้อยแล้ว',1);return}
+              try{await ref.set(clone(S));setStat('✓ บันทึกข้อมูลร่วมแล้ว')}catch(e){setStat('บันทึกข้อมูลร่วมไม่ได้ (ไม่มีสิทธิ์แก้ไข) · เก็บในเบราว์เซอร์นี้',1)}},500)}
+        
+        function fixSt(){if(!S.committees.some(c=>c.id===st.c))st.c=(S.committees[0]||{}).id;if(!S.years.includes(st.y))st.y=Math.max(...S.years)}
+        
+        function syncF(){$('#fc').innerHTML=S.committees.map(c=>`<option value="${c.id}">${esc(c.n)}</option>`).join('');$('#fy').innerHTML=[...S.years].sort((a,b)=>b-a).map(y=>`<option value="${y}">ปีงบประมาณ ${y}</option>`).join('');$('#fc').value=st.c;$('#fy').value=st.y}
+        
+        const pc=(a,t,d)=>d==='down'?(a>0?t/a*100:100):(t>0?a/t*100:null);
+        
+        function stat(k){let a=0,t=0,n=0;k.a.forEach((v,i)=>{if(v!=null){a+=v;t+=k.t[i]||0;n++}});if(!n)return{p:null,s:'wait',n:0,a:0};const p=pc(a,t,k.d);return{p,s:p==null?'wait':p>=100?'ok':p>=85?'mid':'bad',n,a}}
+        
+        const LB={ok:['บรรลุเป้าหมาย','b-ok','var(--ok)'],mid:['ใกล้ถึงเป้าหมาย','b-mid','#F59E0B'],bad:['ต่ำกว่าเป้าหมาย','b-bad','var(--bad)'],wait:['รอประเมิน','b-wait','var(--wait)']};
+       
+        function rSum(){const ks=cur(),s=ks.map(stat),c=x=>s.filter(a=>a.s===x).length,ev=s.filter(a=>a.p!=null),avg=ev.length?ev.reduce((a,b)=>a+b.p,0)/ev.length:null;
+          $('#sum').innerHTML=[['ตัวชี้วัดทั้งหมด',ks.length,'ตัวชี้วัด'],['บรรลุเป้าหมาย',c('ok'),'จาก '+ks.length+' ตัว'],['ความสำเร็จเฉลี่ย',avg==null?'–':fmt(avg)+'%','เทียบเป้าหมายสะสม'],['ต่ำกว่าเป้า / รอประเมิน',c('bad')+' / '+c('wait'),'ตัวชี้วัด']].map(a=>`<div class="card"><div class="k">${a[0]}</div><div class="big">${a[1]}</div><div class="k">${a[2]}</div></div>`).join('')}
+        
+        function monthly(){const ks=cur();return MN.map((_,i)=>{const v=ks.filter(k=>k.a[i]!=null).map(k=>pc(k.a[i],k.t[i]||0,k.d)).filter(x=>x!=null);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null})}
+        
+        const PAL=['#3B82F6','#10B981','#F59E0B','#8B5CF6','#EC4899','#14B8A6','#EF4444','#6366F1','#84CC16','#F97316'];
+        const niceMax=v=>{const p=Math.pow(10,Math.floor(Math.log10(v||1))),n=v/p;return(n<=1?1:n<=2?2:n<=5?5:10)*p};
+        
+        function rCh(){const ks=cur();st.hide=st.hide||{};st.ks=st.ks||'all';
+          if(st.ks!=='all'&&!ks.some(k=>k.id===st.ks))st.ks='all';
+            $('#ks').innerHTML='<option value="all">ทุกตัวชี้วัด (%)</option>'+ks.map(k=>`<option value="${k.id}">${esc(k.n)} (${esc(k.u)})</option>`).join('');$('#ks').value=st.ks;
+              
+              if(!ks.length){$('#cht').textContent='ผลงานรายเดือน';$('#ch').innerHTML='<div class="empty">ยังไม่มีตัวชี้วัด</div>';return}
+        
+        const W=760,H=290,L=50,B=28,T=18,R=10,gw=(W-L-R)/12,cx=i=>L+gw*(i+.5);
+        const one=st.ks!=='all'?ks.find(k=>k.id===st.ks):null,col=k=>PAL[ks.indexOf(k)%PAL.length];
+          let mx,ticks=[],g='',leg='',y;
+
+        const grid=(fm)=>{ticks.forEach(v=>g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--mute)">${fm(v)}</text>`);MN.forEach((m,i)=>g+=`<text x="${cx(i)}" y="${H-8}" text-anchor="middle" font-size="11" fill="var(--mute)">${m}</text>`)};
+        const segs=(pts,c,w,dash)=>{let o='',cur=[];const fl=()=>{if(cur.length>1)o+=`<polyline points="${cur.join(' ')}" fill="none" stroke="${c}" stroke-width="${w}" ${dash?'stroke-dasharray="6 4"':''} stroke-linejoin="round"/>`;cur=[]};pts.forEach(p=>p?cur.push(p.join(',')):fl());fl();return o};
+          if(one){const c=col(one),a=one.a,t=one.t;mx=niceMax(Math.max(1,...a.filter(v=>v!=null),...t)*1.12);y=v=>T+(H-T-B)*(1-v/mx);for(let j=0;j<=4;j++)ticks.push(mx*j/4);grid(fmt);
+            $('#cht').textContent=`ผลงานจริงเทียบเป้า — ${one.n} (${one.u})`;
+
+              if(st.ch==='bar')a.forEach((v,i)=>{if(v!=null){const w=gw*.5;g+=`<rect x="${cx(i)-w/2}" y="${y(v)}" width="${w}" height="${Math.max(0,y(0)-y(v))}" rx="4" fill="${c}"><title>${MN[i]}: ${fmt(v)} ${esc(one.u)} · เป้า ${fmt(t[i])} (${fmt(pc(v,t[i]||0,one.d))}%)</title></rect><text x="${cx(i)}" y="${y(v)-5}" text-anchor="middle" font-size="10" fill="var(--ink)">${fmt(v)}</text>`}});
+                else{g+=segs(a.map((v,i)=>v==null?null:[cx(i),y(v)]),c,2.8);a.forEach((v,i)=>{if(v!=null)g+=`<circle cx="${cx(i)}" cy="${y(v)}" r="4.5" fill="${c}"><title>${MN[i]}: ${fmt(v)} ${esc(one.u)} · เป้า ${fmt(t[i])}</title></circle><text x="${cx(i)}" y="${y(v)-9}" text-anchor="middle" font-size="10" fill="var(--ink)">${fmt(v)}</text>`})}
+                  g+=segs(t.map((v,i)=>[cx(i),y(v||0)]),'var(--bad)',2,1);
+                    
+                  leg=`<span><i style="background:${c}"></i>ผลงานจริง (${esc(one.u)})</span><span><i style="background:var(--bad)"></i>เป้าหมายรายเดือน</span>`}
+
+                  else{$('#cht').textContent='% ความสำเร็จรายเดือน แยกตามตัวชี้วัด';const vis=ks.filter(k=>!st.hide[k.id]),pv=k=>k.a.map((v,i)=>v==null?null:pc(v,k.t[i]||0,k.d));
+
+        const m=Math.max(0,...vis.flatMap(k=>pv(k).filter(v=>v!=null)));mx=Math.max(120,Math.ceil(m/20)*20);const stp=mx<=160?20:mx<=400?50:100;for(let v=0;v<=mx;v+=stp)ticks.push(v);y=v=>T+(H-T-B)*(1-v/mx);grid(v=>v);
+          g+=`<line x1="${L}" x2="${W-R}" y1="${y(100)}" y2="${y(100)}" stroke="var(--bad)" stroke-dasharray="5 4"/><text x="${W-R}" y="${y(100)-4}" text-anchor="end" font-size="10" fill="var(--bad)">เป้า 100%</text>`;
+        
+        const n=vis.length,tip=(k,i,v)=>`${esc(k.n)} · ${MN[i]}: จริง ${fmt(k.a[i])} ${esc(k.u)} / เป้า ${fmt(k.t[i])} = ${fmt(v)}%`;
+          if(st.ch==='bar'){const bw=Math.min(24,gw*.84/Math.max(n,1));vis.forEach((k,j)=>pv(k).forEach((v,i)=>{if(v!=null){const x=cx(i)-bw*n/2+j*bw;g+=`<rect x="${x}" y="${y(v)}" width="${Math.max(1,bw-1.5)}" height="${Math.max(0,y(0)-y(v))}" rx="2" fill="${col(k)}"><title>${tip(k,i,v)}</title></rect>`+(bw>=13?`<text x="${x+(bw-1.5)/2}" y="${y(v)-3}" text-anchor="middle" font-size="9" fill="var(--ink)">${Math.round(v)}</text>`:'')}}))}
+            else vis.forEach(k=>{const v=pv(k);g+=segs(v.map((q,i)=>q==null?null:[cx(i),y(q)]),col(k),2.4);v.forEach((q,i)=>{if(q!=null)g+=`<circle cx="${cx(i)}" cy="${y(q)}" r="3.8" fill="${col(k)}"><title>${tip(k,i,q)}</title></circle>`})});
+
+            leg=ks.map(k=>`<button class="lg ${st.hide[k.id]?'off':''}" data-h="${k.id}" aria-pressed="${!st.hide[k.id]}"><i style="background:${col(k)}"></i>${esc(k.n)}</button>`).join('')+(n?'':'<span>เลือกตัวชี้วัดอย่างน้อย 1 ตัว</span>')}
+              $('#ch').innerHTML=`<div class="wrap"><svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:620px" role="img" aria-label="กราฟรายเดือน">${g}</svg></div><div class="legend">${leg}</div>`+(one?'':'<div class="k" style="margin-top:6px"></div>')}
+
+        function rDn(){const s=cur().map(stat),keys=['ok','mid','bad','wait'],cnt=keys.map(k=>s.filter(a=>a.s===k).length),tot=cnt.reduce((a,b)=>a+b,0)||1,R=70,C=2*Math.PI*R;let off=0,p=`<circle cx="100" cy="100" r="${R}" fill="none" stroke="var(--line)" stroke-width="28"/>`;
+          keys.forEach((k,i)=>{const l=cnt[i]/tot*C;if(l)p+=`<circle cx="100" cy="100" r="${R}" fill="none" stroke="${LB[k][2]}" stroke-width="28" stroke-dasharray="${l} ${C-l}" stroke-dashoffset="${-off}" transform="rotate(-90 100 100)"/>`;off+=l});
+            $('#dn').innerHTML=`<svg viewBox="0 0 200 200" width="190" style="display:block;margin:0 auto" role="img" aria-label="กราฟวงกลมสถานะ">${p}<text x="100" y="104" text-anchor="middle" font-size="26" font-family="Kanit" fill="var(--ink)">${s.length}</text><text x="100" y="122" text-anchor="middle" font-size="11" fill="var(--mute)">ตัวชี้วัด</text></svg><div class="legend" style="justify-content:center">${keys.map((k,i)=>`<span><i style="background:${LB[k][2]}"></i>${LB[k][0]} ${cnt[i]}</span>`).join('')}</div>`}
+
+        function rTb(){const ks=cur();$('#emp').innerHTML=ks.length?'':`<div class="empty">ยังไม่มีตัวชี้วัดของ ${esc(cname(st.c))} ปี ${st.y}<br><button class="btn" id="e1">+ เพิ่มตัวชี้วัดแรก</div>`;
+
+          $('#tb').innerHTML=ks.length?'<tr><th>ตัวชี้วัด</th><th>หน่วย</th><th class="r">เป้าหมาย/เดือน</th><th class="r">ผลงานเฉลี่ย/เดือน</th><th class="r">% ความสำเร็จ</th><th>ความคืบหน้า</th><th>สถานะ</th><th></th></tr>'+ks.map(k=>{const s=stat(k),l=LB[s.s];
+
+            return`<tr><td>${esc(k.n)}${k.d==='down'?' <span class="k">(ต่ำดี)</span>':''}</td><td>${esc(k.u)}</td><td class="r">${fmt(avgT(k))}</td><td class="r">${s.n?fmt(s.a/s.n):'–'}</td><td class="r">${s.p==null?'–':fmt(s.p)+'%'}</td><td><div class="bar"><i style="width:${Math.min(100,s.p||0)}%;background:${l[2]}"></i></div></td><td><span class="badge ${l[1]}">${l[0]}</span></td><td><button class="ic" data-e="${k.id}" title="แก้ไข">✎</button></td></tr>`}).join(''):''}
+
+        function rMt(){if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('#mt'))return;const ks=cur();
+
+          $('#mt').innerHTML=ks.length?'<tr><th>ตัวชี้วัด</th><th></th>'+MN.map(m=>`<th class="r">${m}</th>`).join('')+'<th class="r">รวมผลงาน</th></tr>'+ks.map(k=>['t','a'].map(r=>`<tr class="${r==='t'?'tg':''}">${r==='t'?`<td rowspan="2">${esc(k.n)}<div class="k">${esc(k.u)}</div></td>`:''}<td class="k">${r==='t'?'เป้า':'จริง'}</td>${k[r].map((v,i)=>`<td class="r"><input type="number" step="any" data-k="${k.id}" data-r="${r}" data-i="${i}" value="${v??''}" placeholder="–" aria-label="${esc(k.n)} ${r==='t'?'เป้า':'จริง'} ${MN[i]}"></td>`).join('')}<td class="r">${r==='a'?fmt(k.a.reduce((x,y)=>x+(y||0),0)):''}</td></tr>`).join('')).join(''):'<tr><td class="k">ยังไม่มีตัวชี้วัด — เพิ่มได้ที่ปุ่ม ⚙ ตั้งค่าตัวชี้วัด</td></tr>'}
+
+        /* ปีงบประมาณของการประชุม: ใช้ค่าที่ผู้ใช้เลือก (m.y) ก่อนเสมอ ถ้าข้อมูลเก่าไม่มี y ค่อยคำนวณจากวันที่ */
+        const fyOf=iso=>{const d=new Date(iso+'T00:00:00'),y=d.getFullYear()+543;return d.getMonth()+1>=10?y+1:y};
+        const myOf=m=>m.y||fyOf(m.d);
+        const okUrl=u=>/^https?:\/\//i.test(u||'');
+
+        function rMl(){const ms=S.meetings.filter(m=>m.c===st.c&&myOf(m)===st.y).sort((a,b)=>b.d.localeCompare(a.d));
+          $('#ml').innerHTML=ms.length?ms.map(m=>{const d=new Date(m.d+'T00:00:00');return`<div class="mi"><div class="date"><b style="font-size:20px">${d.getDate()}</b><br>${d.toLocaleDateString('th-TH',{month:'short',year:'numeric'})}</div><div class="t">${esc(m.t)}<div class="k">${esc(cname(m.c))} · ปีงบประมาณ ${myOf(m)}</div></div>${okUrl(m.u)?`<a class="btn g s" href="${esc(m.u)}" target="_blank" rel="noopener" style="text-decoration:none">⬇ เปิด/ดาวน์โหลดเอกสาร</a>`:'<span class="k">ไม่มีไฟล์แนบ</span>'}<button class="ic" data-me="${m.id}" title="แก้ไข">✎</button><button class="ic" data-md="${m.id}" title="ลบ">🗑</button></div>`}).join(''):`<div class="empty">ยังไม่มีการประชุมในปีงบประมาณ ${st.y} ของ ${esc(cname(st.c))}</div>`}
+
+        function all(){fixSt();syncF();rSum();rCh();rDn();rTb();rMt();rMl();if($('#ovS').classList.contains('show'))fillS()}
+
+        const show=(id,on=true)=>$(id).classList.toggle('show',on);
+
+        function ask(msg,btn='ลบ'){return new Promise(r=>{$('#cm').textContent=msg;$('#cy').textContent=btn;show('#ovC');const f=v=>{show('#ovC',false);$('#cy').onclick=$('#cn').onclick=null;r(v)};$('#cy').onclick=()=>f(true);$('#cn').onclick=()=>f(false)})}
+        function fillS(){const o=(a,f)=>a.map(f).join('');
+          $('#cur').innerHTML=o(cur(),k=>`<div><span>${esc(k.n)}<br><small class="k">${esc(k.u)} · เป้า ${fmt(avgT(k))}/เดือน · ${k.d==='down'?'ยิ่งต่ำยิ่งดี':'ยิ่งสูงยิ่งดี'}</small></span><span><button class="ic" data-e="${k.id}" title="แก้ไข">✎</button><button class="ic" data-x="${k.id}" title="ลบ">🗑</button></span></div>`)||`<div class="k">ยังไม่มีตัวชี้วัดของ ${esc(cname(st.c))} ปี ${st.y}</div>`;
+          $('#fcm').innerHTML=o(S.committees,c=>`<option value="${c.id}">${esc(c.n)}</option>`);$('#fyr').innerHTML=o(S.years,y=>`<option>${y}</option>`);
+
+        const k=S.kpis.find(a=>a.id===editId);$('#fh').textContent=k?'แก้ไขตัวชี้วัด':'เพิ่มตัวชี้วัดใหม่';
+          $('#fn').value=k?k.n:'';$('#fu').value=k?k.u:'';$('#fd').value=k?k.d:'up';$('#ft').value=k?avgT(k):'';$('#fcm').value=k?k.c:st.c;$('#fyr').value=k?k.y:st.y;
+          $('#cl').innerHTML=o(S.committees,c=>`<div class="row"><input data-cn="${c.id}" value="${esc(c.n)}"><button class="ic" data-cd="${c.id}" title="ลบ">🗑</button></div>`);
+          $('#yl').innerHTML=o(S.years,y=>`<span class="chip">${y}<button class="ic" data-yd="${y}" title="ลบ">✕</button></span>`);
+        
+        const py=st.y-1,has=S.kpis.some(a=>a.c===st.c&&a.y===py);$('#cp').style.display=has?'':'none';$('#cp').textContent=``}
+
+        function openS(id){editId=id||null;fillS();show('#ovS')}
+          $('#open').onclick=()=>openS();$('#add1').onclick=()=>openS();$('#cx').onclick=()=>show('#ovS',false);
+          $('#sv').onclick=()=>{const n=$('#fn').value.trim(),t=parseFloat($('#ft').value);if(!n||isNaN(t)||t<0){toast('กรุณากรอกชื่อตัวชี้วัดและเป้าหมายรายเดือน (ตัวเลข)');return}
+
+          const f={n,u:$('#fu').value.trim(),d:$('#fd').value,c:$('#fcm').value,y:+$('#fyr').value},k=S.kpis.find(a=>a.id===editId);
+            if(k){const o=avgT(k);Object.assign(k,f);if(t!==o)k.t=Array(12).fill(t)}else S.kpis.push({id:uid(),...f,t:Array(12).fill(t),a:Array(12).fill(null)});
+            st.c=f.c;st.y=f.y;editId=null;save();all();toast('บันทึกแล้ว')};
+            $('#ovS').addEventListener('click',async e=>{const b=e.target.closest('button');if(e.target.id==='ovS')return show('#ovS',false);if(!b)return;const d=b.dataset;
+
+              if(d.e){editId=d.e;fillS()}
+              
+                else if(d.x){if(await ask('ลบตัวชี้วัดนี้และข้อมูลรายเดือนทั้งหมดของตัวชี้วัด?')){S.kpis=S.kpis.filter(k=>k.id!==d.x);if(editId===d.x)editId=null;save();all()}}
+
+                else if(d.cd){if(S.committees.length<2)return toast('ต้องมีคณะกรรมการอย่างน้อย 1 คณะ');if(await ask('ลบคณะกรรมการนี้ พร้อมตัวชี้วัดและการประชุมทั้งหมดของคณะ?')){S.committees=S.committees.filter(c=>c.id!==d.cd);S.kpis=S.kpis.filter(k=>k.c!==d.cd);S.meetings=S.meetings.filter(m=>m.c!==d.cd);save();all()}}
+
+                else if(d.yd){const y=+d.yd;if(S.years.length<2)return toast('ต้องมีปีงบประมาณอย่างน้อย 1 ปี');if(await ask(`ลบปีงบประมาณ ${y} พร้อมตัวชี้วัดของปีนี้ทั้งหมด?`)){S.years=S.years.filter(v=>v!==y);S.kpis=S.kpis.filter(k=>k.y!==y);save();all()}}
+
+                else if(b.id==='anc'){const n=$('#nc').value.trim();if(!n)return;S.committees.push({id:'c'+(S.nid++),n});$('#nc').value='';save();all()}
+
+                else if(b.id==='any'){const y=parseInt($('#ny').value);if(!(y>=2500&&y<=2700))return toast('กรอกปี พ.ศ. 4 หลัก เช่น 2571');if(S.years.includes(y))return toast('มีปีนี้แล้ว');S.years.push(y);S.years.sort();$('#ny').value='';save();all()}
+
+                else if(b.id==='cp'){const py=st.y-1;cur().length&&!(await ask(`ปี ${st.y} มีตัวชี้วัดอยู่แล้ว ต้องการเพิ่มตัวชี้วัดจากปี ${py} ต่อท้ายหรือไม่?`,'เพิ่ม'))||(S.kpis.filter(k=>k.c===st.c&&k.y===py).forEach(k=>S.kpis.push({...clone(k),id:uid(),y:st.y,a:Array(12).fill(null)})),save(),all(),toast('คัดลอกแล้ว'))}});
+
+                $('#ovS').addEventListener('change',e=>{const id=e.target.dataset.cn;if(id){const c=S.committees.find(x=>x.id===id),n=e.target.value.trim();if(c&&n){c.n=n;save();syncF();rSum();rMl()}}});
+
+        function openM(id){editM=id||null;const m=S.meetings.find(x=>x.id===id);$('#mh').textContent=m?'แก้ไขการประชุม':'เพิ่มการประชุม';$('#mc').innerHTML=S.committees.map(c=>`<option value="${c.id}">${esc(c.n)}</option>`).join('');
+          $('#my').innerHTML=[...S.years].sort((a,b)=>b-a).map(y=>`<option value="${y}">ปีงบประมาณ ${y}</option>`).join('');
+          $('#md').value=m?m.d:new Date().toISOString().slice(0,10);$('#mt2').value=m?m.t:'';$('#mu').value=m?m.u||'':'';$('#mc').value=m?m.c:st.c;$('#my').value=m?myOf(m):st.y;show('#ovM')}
+          $('#addm').onclick=()=>openM();$('#mx').onclick=()=>show('#ovM',false);
+          
+        $('#ms').onclick=()=>{const d=$('#md').value,t=$('#mt2').value.trim(),u=$('#mu').value.trim();if(!d||!t)return toast('กรุณากรอกวันที่และหัวข้อ');if(u&&!okUrl(u))return toast('ลิงก์ต้องขึ้นต้นด้วย http:// หรือ https://');
+          const f={d,t,u,c:$('#mc').value,y:+$('#my').value},m=S.meetings.find(x=>x.id===editM);if(m)Object.assign(m,f);else S.meetings.push({id:uid(),...f});
+            st.c=f.c;st.y=f.y;show('#ovM',false);save();all();toast('บันทึกแล้ว')};
+            $('#ml').onclick=async e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.me)openM(b.dataset.me);else if(b.dataset.md&&await ask('ลบการประชุมนี้?')){S.meetings=S.meetings.filter(m=>m.id!==b.dataset.md);save();all()}};
+            $('#ovM').onclick=e=>{if(e.target.id==='ovM')show('#ovM',false)};
+            $('#fc').onchange=e=>{st.c=e.target.value;all()};$('#fy').onchange=e=>{st.y=+e.target.value;all()};
+            $$('aside button').forEach(b=>b.onclick=()=>{$$('aside button').forEach(x=>x.classList.toggle('on',x===b));$$('.tab').forEach(t=>t.classList.toggle('on',t.id===b.dataset.t))});
+            $('#th').onclick=()=>{const r=document.documentElement,d=r.dataset.theme,n=(d==='dark'||(!d&&matchMedia('(prefers-color-scheme: dark)').matches))?'light':'dark';r.dataset.theme=n;try{localStorage.setItem('kpi-theme',n)}catch(e){}};
+            $('#seg').onclick=e=>{const b=e.target.closest('button');if(!b)return;st.ch=b.dataset.c;$$('#seg button').forEach(x=>x.classList.toggle('on',x===b));rCh()};
+            $('#ks').onchange=e=>{st.ks=e.target.value;rCh()};$('#ch').onclick=e=>{const b=e.target.closest('button');if(b&&b.dataset.h){st.hide[b.dataset.h]=!st.hide[b.dataset.h];rCh()}};
+            $('#tb').onclick=e=>{const b=e.target.closest('button');if(b&&b.dataset.e)openS(b.dataset.e)};
+            $('#emp').onclick=e=>{if(e.target.id==='e1')openS();if(e.target.id==='e2')sample()};
+            $('#mt').onchange=e=>{const t=e.target,d=t.dataset;if(!d.k)return;const k=S.kpis.find(a=>a.id===d.k);if(!k)return;const v=t.value===''?null:parseFloat(t.value);k[d.r][+d.i]=d.r==='t'?(v==null?0:v):v;save();document.activeElement.blur();rSum();rCh();rDn();rTb();rMt()};
+
+        function sample(){const T=[['รายได้รวม','ล้านบาท',50,'up'],['อัตราการใช้เตียง','ร้อยละ',80,'up'],['ต้นทุนต่อหน่วยบริการ','พันบาท',12,'down'],['ความพึงพอใจผู้รับบริการ','ร้อยละ',85,'up']],n=st.y>=2570?2:12;
+          T.forEach(r=>{const f=.8+Math.random()*.35;S.kpis.push({id:uid(),n:r[0],u:r[1],d:r[3],c:st.c,y:st.y,t:Array(12).fill(r[2]),a:MN.map((_,i)=>i<n?+(r[2]*(r[3]==='down'?2-f:f)*(1+(Math.random()-.5)*.1)).toFixed(1):null)})});save();all();toast('เพิ่มข้อมูลตัวอย่างแล้ว (แก้ไขหรือลบได้)')}
+        
+            $('#csv').onclick=async()=>{const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"',rows=[['คณะกรรมการ','ปีงบประมาณ','ตัวชี้วัด','หน่วย','ประเภท',...MN]];
+              cur().forEach(k=>{rows.push([cname(k.c),k.y,k.n,k.u,'เป้า',...k.t]);rows.push([cname(k.c),k.y,k.n,k.u,'จริง',...k.a])});
+                
+                const data='\uFEFF'+rows.map(r=>r.map(q).join(',')).join('\r\n'),fn=`kpi-${st.y}.csv`;
+                  try{const dl=window.claude&&await claude.use('downloads');if(dl){await dl.save({filename:fn,data});return}}catch(e){if(e&&e.code==='cancelled')return}
+
+                  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type:'text/csv'}));a.download=fn;a.click();toast('หากไม่เริ่มดาวน์โหลด โปรดเปิดหน้านี้ในแท็บใหม่')};
+                    document.addEventListener('keydown',e=>{if(e.key==='Escape')['#ovS','#ovM'].forEach(i=>show(i,false))});
+
+        (async()=>{try{if(!window.claude)return;const db=await Promise.race([claude.use('db'),new Promise(r=>setTimeout(()=>r(null),10000))]);if(!db)return;ref=db.doc('app/state');
+          ref.onSnapshot(s=>{if(s.exists){S=clone(s.data());all();setStat('✓ ซิงค์ข้อมูลร่วมแล้ว')}else setStat('ยังไม่มีข้อมูลร่วม — แก้ไขเพื่อเริ่มบันทึก')},()=>{ref=null;setStat('เชื่อมต่อข้อมูลร่วมไม่ได้',1)})}catch(e){}})();
+            all();setStat('พร้อมใช้งาน');
+    </script>
+  </body>
+</html>
